@@ -68,3 +68,32 @@ jobs:
           upload_if_exists "d3dx9_43.dll"
           upload_if_exists "d3dx11_43.dll"
           upload_if_exists "d3dx10_43.dll"
+
+      - name: Build and upload update.zip
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="${{ steps.ver.outputs.tag }}"
+
+          EXE_PATH=""
+          if [ -f "x64/Release/Fluffy-FiveM.exe" ]; then EXE_PATH="x64/Release/Fluffy-FiveM.exe"; fi
+          if [ -z "$EXE_PATH" ] && [ -f "x64/Release/fluffyFiveM.exe" ]; then EXE_PATH="x64/Release/fluffyFiveM.exe"; fi
+          if [ -z "$EXE_PATH" ] && [ -f "Fluffy-FiveM.exe" ]; then EXE_PATH="Fluffy-FiveM.exe"; fi
+          if [ -z "$EXE_PATH" ] && [ -f "fluffyFiveM.exe" ]; then EXE_PATH="fluffyFiveM.exe"; fi
+          if [ -z "$EXE_PATH" ]; then
+            echo "::error::No executable found to package update.zip"
+            exit 1
+          fi
+
+          rm -f update.zip
+          zip -j update.zip "$EXE_PATH" \
+            x64/Release/D3DCompiler_43.dll x64/Release/d3dx9_43.dll x64/Release/d3dx11_43.dll x64/Release/d3dx10_43.dll \
+            D3DCompiler_43.dll d3dx9_43.dll d3dx11_43.dll d3dx10_43.dll \
+            2>/dev/null || true
+
+          if [ ! -f update.zip ]; then
+            echo "::error::Failed to create update.zip"
+            exit 1
+          fi
+
+          gh release upload "$TAG" update.zip --clobber
