@@ -1,0 +1,49 @@
+# Build Fluffy-FiveM and publish to GitHub Releases when you push a version tag.
+# Usage: Create a tag (e.g. v1.0.0), push it:  git tag v1.0.0  &&  git push origin v1.0.0
+name: Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'   # e.g. v1.0.0, v1.0.1
+
+jobs:
+  build-and-release:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+        with:
+          msbuild-architecture: x64
+
+      - name: Restore NuGet packages
+        run: nuget restore Stopped.sln
+        shell: pwsh
+
+      - name: Build Release x64
+        run: |
+          msbuild Stopped.sln /p:Configuration=Release /p:Platform=x64 /p:ExtraSdkInclude= /m
+        shell: pwsh
+
+      - name: Find built exe
+        id: exe
+        run: |
+          $out = Get-ChildItem -Recurse -Filter "Fluffy-FiveM.exe" | Select-Object -First 1
+          if (-not $out) { Write-Error "Fluffy-FiveM.exe not found under repo" }
+          $dir = $out.DirectoryName
+          Write-Output "path=$($out.FullName)" >> $env:GITHUB_OUTPUT
+          Write-Output "dir=$dir" >> $env:GITHUB_OUTPUT
+        shell: pwsh
+
+      - name: Create GitHub Release and upload exe
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.exe.outputs.path }}
+          generate_release_notes: true
+          draft: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
