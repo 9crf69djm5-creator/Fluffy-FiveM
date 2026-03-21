@@ -1,0 +1,155 @@
+MSBuild version 17.14.40+3e7442088 for .NET Framework
+Build started 3/20/2026 6:49:25 PM.
+
+     1>Project "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" on node 1 (default targets).
+     1>ValidateSolutionConfiguration:
+         Building solution configuration "Release|x64".
+     1>Project "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" (1) is building "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj" (2) on node 1 (default targets).
+     2>PrepareForBuild:
+         Structured output is enabled. The formatting of compiler diagnostics will reflect the error hierarchy. See https://aka.ms/cpp/structured-output for more details.
+       InitializeBuildStatus:
+         Touching "x64\Release\Stopped.tlog\unsuccessfulbuild".
+       ComputeStdModulesCompileInputs:
+         Reading library manifest file 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\modules\modules.json' which provides data for library 'microsoft/STL'.
+         Adding module source 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\modules\std.ixx' from library 'microsoft/STL' to be built with this project.
+         Adding module source 'C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\modules\std.compat.ixx' from library 'microsoft/STL' to be built with this project.
+       ClCompile:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX86\x64\CL.exe /c /I"c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\include" /Zi /nologo /W3 /WX- /diagnostics:column /sdl /MP /O2 /Oi /GL /D HAS_DXSDK_D3DX /D NDEBUG /D _CONSOLE /D CURL_STATICLIB /D _MBCS /Gm- /EHsc /MD /GS /Gy /fp:precise /Zc:wchar_t /Zc:forScope /Zc:inline /std:c++latest /permissive- /Fo"x64\Release\\" /Fd"x64\Release\vc143.pdb" /external:W3 /Gd /TP /FC /errorReport:queue main.cpp
+         main.cpp
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Includes\Utils.hpp(13,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Includes\Utils.hpp(133,18): warning C4244: 'initializing': conversion from 'LONG_PTR' to 'DWORD', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Config.hpp(288,35): warning C4101: 'e': unreferenced local variable [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Config.hpp(399,35): warning C4101: 'e': unreferenced local variable [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Memory.hpp(101,20): warning C4244: 'initializing': conversion from 'unsigned long' to 'uint8_t', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(540,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(552,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(559,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(323,34): warning C4311: 'type cast': pointer truncation from 'HANDLE' to 'DWORD' [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(323,34): warning C4302: 'type cast': truncation from 'HANDLE' to 'DWORD' [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(411,39): warning C4312: 'type cast': conversion from 'ULONG' to 'HANDLE' of greater size [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(418,19): warning C4312: 'type cast': conversion from 'ULONG' to 'HANDLE' of greater size [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+         
+     2>C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): warning C4244: '=': conversion from 'const wchar_t' to 'char', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         (compiling source file 'main.cpp')
+             C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18):
+             the template instantiation context (the oldest one first) is
+                 c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Threads\UpdateNames.hpp(99,23):
+                 see reference to function template instantiation 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string<std::_String_const_iterator<std::_String_val<std::_Simple_types<_Elem>>>,0>(_Iter,_Iter,const _Alloc &)' being compiled
+                 with
+                 [
+                     _Elem=wchar_t,
+                     _Iter=std::_String_const_iterator<std::_String_val<std::_Simple_types<wchar_t>>>,
+                     _Alloc=std::allocator<char>
+                 ]
+                     c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Threads\UpdateNames.hpp(99,5):
+                     see the first reference to 'std::basic_string<char,std::char_traits<char>,std::allocator<char>>::basic_string' in 'Core::Threads::cUpdateNames::WstringToString'
+                 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(812,17):
+                 see reference to function template instantiation 'void std::basic_string<char,std::char_traits<char>,std::allocator<char>>::_Construct_from_iter<const wchar_t*,const wchar_t*,_Size_type>(_Iter,const _Sent,_Size)' being compiled
+                 with
+                 [
+                     _Size_type=unsigned __int64,
+                     _Iter=const wchar_t *,
+                     _Sent=const wchar_t *,
+                     _Size=unsigned __int64
+                 ]
+                 C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xstring(968,18):
+                 see reference to function template instantiation '_OutIt *std::_Copy_n_unchecked4<const wchar_t*,_Size,char*>(_InIt,_SizeTy,_OutIt)' being compiled
+                 with
+                 [
+                     _OutIt=char *,
+                     _Size=unsigned __int64,
+                     _InIt=const wchar_t *,
+                     _SizeTy=unsigned __int64
+                 ]
+         
+       Link:
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\bin\HostX86\x64\link.exe /ERRORREPORT:QUEUE /OUT:"c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\x64\Release\Fluffy-FiveM.exe" /NOLOGO /LIBPATH:"c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\packages\Microsoft.DXSDK.D3DX.9.29.952.8\build\native\release\lib\x64\\" d3dx9.lib d3dx10.lib d3dx11.lib d3dx9.lib d3d9.lib d3d11.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /MANIFEST /MANIFESTUAC:"level='requireAdministrator' uiAccess='false'" /manifest:embed /DEBUG /PDB:"c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\x64\Release\Fluffy-FiveM.pdb" /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /LTCG:incremental /LTCGOUT:"x64\Release\Fluffy-FiveM.iobj" /TLBID:1 /DYNAMICBASE /NXCOMPAT /IMPLIB:"c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\x64\Release\Fluffy-FiveM.lib" /MACHINE:X64 x64\Release\Aimbot.obj
+         x64\Release\Esp.obj
+         x64\Release\HandlingEditor.obj
+         x64\Release\SilentAim.obj
+         x64\Release\Triggerbot.obj
+         x64\Release\Memory.obj
+         x64\Release\byteslouna.obj
+         x64\Release\Gui.obj
+         x64\Release\Overlay.obj
+         x64\Release\imgui.obj
+         x64\Release\imgui_demo.obj
+         x64\Release\imgui_draw.obj
+         x64\Release\imgui_freetype.obj
+         x64\Release\imgui_impl_dx11.obj
+         x64\Release\imgui_impl_win32.obj
+         x64\Release\imgui_tables.obj
+         x64\Release\imgui_widgets.obj
+         x64\Release\MagicBullets.obj
+         x64\Release\origens.obj
+         x64\Release\main.obj
+         x64\Release\Fonts.obj
+         Includes\ImGui\Files\freetype\win64\freetype.lib
+         Security\Api\curl\libcurl.lib
+     2>LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+     2>main.obj : error LNK2001: unresolved external symbol "public: void __cdecl KeyAuth::api::license(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >)" (?license@api@KeyAuth@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z) [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+     2>main.obj : error LNK2001: unresolved external symbol "public: void __cdecl KeyAuth::api::init(void)" (?init@api@KeyAuth@@QEAAXXZ) [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+     2>c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\x64\Release\Fluffy-FiveM.exe : fatal error LNK1120: 2 unresolved externals [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+     2>Done Building Project "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj" (default targets) -- FAILED.
+     1>Done Building Project "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" (default targets) -- FAILED.
+
+Build FAILED.
+
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" (default target) (1) ->
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj" (default target) (2) ->
+       (ClCompile target) -> 
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Includes\Utils.hpp(13,31): warning C4244: 'argument': conversion from 'int' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Includes\Utils.hpp(133,18): warning C4244: 'initializing': conversion from 'LONG_PTR' to 'DWORD', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Config.hpp(288,35): warning C4101: 'e': unreferenced local variable [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\Config.hpp(399,35): warning C4101: 'e': unreferenced local variable [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Memory.hpp(101,20): warning C4244: 'initializing': conversion from 'unsigned long' to 'uint8_t', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(540,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(552,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Core\SDK\Structs\GameClasses.hpp(559,26): warning C4244: 'return': conversion from 'BOOL' to 'float', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(323,34): warning C4311: 'type cast': pointer truncation from 'HANDLE' to 'DWORD' [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(323,34): warning C4302: 'type cast': truncation from 'HANDLE' to 'DWORD' [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(411,39): warning C4312: 'type cast': conversion from 'ULONG' to 'HANDLE' of greater size [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\Security\AntiCrack.hpp(418,19): warning C4312: 'type cast': conversion from 'ULONG' to 'HANDLE' of greater size [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         C:\Program Files\Microsoft Visual Studio\2022\Community\VC\Tools\MSVC\14.44.35207\include\xutility(4813,18): warning C4244: '=': conversion from 'const wchar_t' to 'char', possible loss of data [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+
+
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" (default target) (1) ->
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj" (default target) (2) ->
+       (Link target) -> 
+         LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+
+
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\Stopped.sln" (default target) (1) ->
+       "c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj" (default target) (2) ->
+       (Link target) -> 
+         main.obj : error LNK2001: unresolved external symbol "public: void __cdecl KeyAuth::api::license(class std::basic_string<char,struct std::char_traits<char>,class std::allocator<char> >)" (?license@api@KeyAuth@@QEAAXV?$basic_string@DU?$char_traits@D@std@@V?$allocator@D@2@@std@@@Z) [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         main.obj : error LNK2001: unresolved external symbol "public: void __cdecl KeyAuth::api::init(void)" (?init@api@KeyAuth@@QEAAXXZ) [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+         c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\x64\Release\Fluffy-FiveM.exe : fatal error LNK1120: 2 unresolved externals [c:\Users\jcdro\Downloads\RustFiveM Package11\FiveM ExternalAuros\src\src.vcxproj]
+
+    14 Warning(s)
+    3 Error(s)
+
+Time Elapsed 00:00:05.92
