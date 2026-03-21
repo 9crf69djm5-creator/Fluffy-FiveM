@@ -26,10 +26,10 @@ int PauseLoop;
 inline std::mutex DrawMtx;
 int CurrentTab = 0;
 
-static int s_PlayerListSel = -1;
+static uintptr_t s_PlayerTargetPed = 0;
 static int s_VehicleListSel = -1;
-static int s_TrollSel = -1;
-static int s_TpPlayerIdx = -1;
+static uintptr_t s_TrollTargetPed = 0;
+static uintptr_t s_TpTargetPed = 0;
 bool IsSelected;
 static int selectedItem = 0;
 
@@ -100,6 +100,12 @@ inline void PushPedVelocityUp( CPed* ped, float addZ ) {
 }
 
 } // namespace MiscPedActions
+
+inline void SnapshotEntityList( std::vector<Core::SDK::Game::EntityStruct>& out )
+{
+    std::lock_guard<std::mutex> lk( Core::Threads::g_EntityList.EntityListMutex );
+    out = Core::SDK::Game::EntityList;
+}
 
 } // namespace
 
@@ -927,29 +933,47 @@ namespace Gui
                 ImGui::EndGroup();
                 break;
             case MISC_PLAYERLIST:
-                
+                {
+                std::vector<Core::SDK::Game::EntityStruct> entSnap;
+                SnapshotEntityList( entSnap );
+
+                Core::SDK::Game::EntityStruct plSelected{};
+                bool plHasSel = false;
+                if ( s_PlayerTargetPed ) {
+                    for ( const auto& e : entSnap ) {
+                        if ( e.Ped && reinterpret_cast<uintptr_t>( e.Ped ) == s_PlayerTargetPed ) {
+                            plSelected = e;
+                            plHasSel = true;
+                            break;
+                        }
+                    }
+                    if ( !plHasSel )
+                        s_PlayerTargetPed = 0;
+                }
+
                 ImGui::SetCursorPos(ImVec2(20, 0));
                 ImGui::BeginGroup();
                 {
                     ImGui::CustomChild(xorstr("Players List"), ImVec2(ImGui::GetWindowSize().x / 2 - 25, 330));
                     {
-
+                        ImGui::TextColored(ImColor(140, 150, 170), xorstr("Session players (PlayerInfo + slot)"));
+                        ImGui::BeginChild(xorstr("##pl_scroll"), ImVec2(-1, 0), ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysVerticalScrollbar);
                         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(14, 8));
-                        for (int i = 0; i < Core::SDK::Game::EntityList.size(); i++)
+                        for ( const auto& ent : entSnap )
                         {
-                            if (Core::SDK::Game::EntityList[i].Ped == Core::SDK::Pointers::pLocalPlayer)
+                            if ( !Core::SDK::Game::IsRemoteSessionPlayer( ent.Ped ) )
                                 continue;
 
-                            if (Core::SDK::Game::EntityList[i].PedType != 2)
-                                continue;
-
-                            std::string label = Core::SDK::Game::GetPlayerListLabel(Core::SDK::Game::EntityList[i]);
-                            ImGui::PushID(reinterpret_cast<void*>(Core::SDK::Game::EntityList[i].Ped));
-                            IsSelected = s_PlayerListSel == i;
-                            if (ImGui::Selectable(label.c_str(), &IsSelected)) s_PlayerListSel = i;
-                            ImGui::PopID();
+                            std::string label = Core::SDK::Game::GetPlayerListLabel( ent );
+                            uintptr_t pkey = reinterpret_cast<uintptr_t>( ent.Ped );
+                            ImGui::PushID( reinterpret_cast<void*>( ent.Ped ) );
+                            IsSelected = ( s_PlayerTargetPed == pkey );
+                            if ( ImGui::Selectable( label.c_str( ), &IsSelected ) )
+                                s_PlayerTargetPed = pkey;
+                            ImGui::PopID( );
                         }
                         ImGui::PopStyleVar();
+                        ImGui::EndChild();
 
                     }
                     ImGui::EndCustomChild();
@@ -960,20 +984,19 @@ namespace Gui
 
                         ImGui::CustomChild(xorstr("Info"), ImVec2(ImGui::GetWindowSize().x / 2 - 25, 88));
                         {
-                            if (s_PlayerListSel == -1) {
+                            if ( !plHasSel ) {
                                 ImGui::TextColored(ImColor(200, 200, 200), xorstr("Select Player"));
                             }
                             else
                             {
-                                auto SelectedPed = Core::SDK::Game::EntityList[s_PlayerListSel];
                                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(14, 4));
 
                                 ImGui::TextColored(ImColor(g_Col.FeaturesText), xorstr("Name:")); ImGui::SameLine();
-                                ImGui::TextColored(ImColor(g_Col.SecundaryText), Core::SDK::Game::GetPlayerListLabel(SelectedPed).c_str());
+                                ImGui::TextColored(ImColor(g_Col.SecundaryText), Core::SDK::Game::GetPlayerListLabel(plSelected).c_str());
                                 ImGui::TextColored(ImColor(g_Col.FeaturesText), xorstr("Server Id:")); ImGui::SameLine();
-                                ImGui::TextColored(ImColor(g_Col.SecundaryText), std::to_string(SelectedPed.Id).c_str());
+                                ImGui::TextColored(ImColor(g_Col.SecundaryText), std::to_string(plSelected.Id).c_str());
                                 ImGui::TextColored(ImColor(g_Col.FeaturesText), xorstr("Distance:")); ImGui::SameLine();
-                                ImGui::TextColored(ImColor(g_Col.SecundaryText), std::to_string(SelectedPed.Distance).c_str());
+                                ImGui::TextColored(ImColor(g_Col.SecundaryText), std::to_string(plSelected.Distance).c_str());
 
                                 ImGui::PopStyleVar();
                             }
@@ -983,54 +1006,45 @@ namespace Gui
 
                         ImGui::CustomChild(xorstr("Actions"), ImVec2(ImGui::GetWindowSize().x / 2 - 25, 242));
                         {
-                            if (s_PlayerListSel == -1) {
+                            if ( !plHasSel ) {
                                 ImGui::TextColored(ImColor(200, 200, 200), xorstr("Select Player"));
                             }
                             else
                             {
-                                auto& SelectedPed = Core::SDK::Game::EntityList[s_PlayerListSel];
-
                                 ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(8, 6));
-                                bool Friend = SelectedPed.IsFriend;
+                                bool Friend = plSelected.IsFriend;
                                 if (ImGui::Checkbox(xorstr("Friend"), &Friend))
                                 {
-                                    Core::SDK::Game::FriendMap[SelectedPed.Ped] = Friend;
+                                    Core::SDK::Game::FriendMap[plSelected.Ped] = Friend;
                                 }
 
                                 ImGui::PushFont(InterRegular);
-                                if (ImGui::Button(xorstr("Go to player"), ImVec2(-1, 26)) && SelectedPed.Ped)
-                                    MiscPedActions::TeleportLocalTo( SelectedPed.Pos );
-                                if (ImGui::Button(xorstr("Bring to me"), ImVec2(-1, 26)) && SelectedPed.Ped)
-                                    MiscPedActions::BringPedToMe( SelectedPed.Ped );
+                                if (ImGui::Button(xorstr("Go to player"), ImVec2(-1, 26)) && plSelected.Ped)
+                                    MiscPedActions::TeleportLocalTo( plSelected.Pos );
+                                if (ImGui::Button(xorstr("Bring to me"), ImVec2(-1, 26)) && plSelected.Ped)
+                                    MiscPedActions::BringPedToMe( plSelected.Ped );
                                 {
                                     float pairW = ( ImGui::GetContentRegionAvail( ).x - 6.f ) * 0.5f;
-                                    if ( ImGui::Button( xorstr( "Freeze" ), ImVec2( pairW, 26 ) ) && SelectedPed.Ped )
-                                        SelectedPed.Ped->FreezePed( true );
+                                    if ( ImGui::Button( xorstr( "Freeze" ), ImVec2( pairW, 26 ) ) && plSelected.Ped )
+                                        plSelected.Ped->FreezePed( true );
                                     ImGui::SameLine( );
-                                    if ( ImGui::Button( xorstr( "Unfreeze" ), ImVec2( pairW, 26 ) ) && SelectedPed.Ped )
-                                        SelectedPed.Ped->FreezePed( false );
+                                    if ( ImGui::Button( xorstr( "Unfreeze" ), ImVec2( pairW, 26 ) ) && plSelected.Ped )
+                                        plSelected.Ped->FreezePed( false );
                                 }
                                 {
                                     float pairW = ( ImGui::GetContentRegionAvail( ).x - 6.f ) * 0.5f;
-                                    if ( ImGui::Button( xorstr( "Ragdoll" ), ImVec2( pairW, 26 ) ) && SelectedPed.Ped )
-                                        MiscPedActions::SetPedRagdoll( SelectedPed.Ped, true );
+                                    if ( ImGui::Button( xorstr( "Ragdoll" ), ImVec2( pairW, 26 ) ) && plSelected.Ped )
+                                        MiscPedActions::SetPedRagdoll( plSelected.Ped, true );
                                     ImGui::SameLine( );
-                                    if ( ImGui::Button( xorstr( "Stop ragdoll" ), ImVec2( pairW, 26 ) ) && SelectedPed.Ped )
-                                        MiscPedActions::SetPedRagdoll( SelectedPed.Ped, false );
+                                    if ( ImGui::Button( xorstr( "Stop ragdoll" ), ImVec2( pairW, 26 ) ) && plSelected.Ped )
+                                        MiscPedActions::SetPedRagdoll( plSelected.Ped, false );
                                 }
-                                if (ImGui::Button(xorstr("Launch up"), ImVec2(-1, 26)) && SelectedPed.Ped)
-                                    MiscPedActions::PushPedVelocityUp( SelectedPed.Ped, 24.f );
+                                if (ImGui::Button(xorstr("Launch up"), ImVec2(-1, 26)) && plSelected.Ped)
+                                    MiscPedActions::PushPedVelocityUp( plSelected.Ped, 24.f );
 
-                                if (ImGui::Button(xorstr("Copy Clothes"), ImVec2(-1, 26)))
+                                if (ImGui::Button(xorstr("Copy Clothes"), ImVec2(-1, 26)) && plSelected.Ped)
                                 {
-                                    if (s_PlayerListSel < 0 || s_PlayerListSel >= Core::SDK::Game::EntityList.size())
-                                        return;
-
-                                    auto& SelectedPed = Core::SDK::Game::EntityList[s_PlayerListSel];
-
-                                    if (!SelectedPed.Ped) return;
-
-                                    uintptr_t pedAddress = reinterpret_cast<uintptr_t>(SelectedPed.Ped);
+                                    uintptr_t pedAddress = reinterpret_cast<uintptr_t>(plSelected.Ped);
                                     uint64_t drawhandler = Mem.Read<uint64_t>(pedAddress + 0x48);
 
                                     uint64_t shoes = Mem.Read<uint64_t>(drawhandler + 0xF0);
@@ -1079,6 +1093,7 @@ namespace Gui
                     ImGui::EndGroup();
                 }
                 ImGui::EndGroup();
+                }
                 break;
             case MISC_VEHICLELIST:
                 
@@ -1172,6 +1187,23 @@ namespace Gui
                 ImGui::EndGroup();
                 break;
             case MISC_TELEPORT:
+                {
+                std::vector<Core::SDK::Game::EntityStruct> tpSnap;
+                SnapshotEntityList( tpSnap );
+                Core::SDK::Game::EntityStruct tpSel{};
+                bool tpHasSel = false;
+                if ( s_TpTargetPed ) {
+                    for ( const auto& e : tpSnap ) {
+                        if ( e.Ped && reinterpret_cast<uintptr_t>( e.Ped ) == s_TpTargetPed ) {
+                            tpSel = e;
+                            tpHasSel = true;
+                            break;
+                        }
+                    }
+                    if ( !tpHasSel )
+                        s_TpTargetPed = 0;
+                }
+
                 ImGui::SetCursorPos(ImVec2(20, 0));
                 ImGui::BeginGroup();
                 {
@@ -1190,20 +1222,19 @@ namespace Gui
                         ImGui::EndChild();
 
                         ImGui::Spacing();
-                        ImGui::TextColored(ImColor(180, 180, 190), xorstr("Players (same actions as Player List)"));
+                        ImGui::TextColored(ImColor(180, 180, 190), xorstr("Session players"));
                         ImGui::BeginChild(xorstr("##tp_players"), ImVec2(-1, 148), ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysVerticalScrollbar);
                         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(14, 6));
-                        for (int i = 0; i < Core::SDK::Game::EntityList.size(); i++)
+                        for ( const auto& ent : tpSnap )
                         {
-                            if (Core::SDK::Game::EntityList[i].Ped == Core::SDK::Pointers::pLocalPlayer)
+                            if ( !Core::SDK::Game::IsRemoteSessionPlayer( ent.Ped ) )
                                 continue;
-                            if (Core::SDK::Game::EntityList[i].PedType != 2)
-                                continue;
-                            std::string plabel = Core::SDK::Game::GetPlayerListLabel(Core::SDK::Game::EntityList[i]);
-                            ImGui::PushID(reinterpret_cast<void*>(Core::SDK::Game::EntityList[i].Ped));
-                            bool sel = s_TpPlayerIdx == i;
-                            if (ImGui::Selectable(plabel.c_str(), sel))
-                                s_TpPlayerIdx = i;
+                            std::string plabel = Core::SDK::Game::GetPlayerListLabel( ent );
+                            uintptr_t pkey = reinterpret_cast<uintptr_t>( ent.Ped );
+                            ImGui::PushID( reinterpret_cast<void*>( ent.Ped ) );
+                            bool sel = ( s_TpTargetPed == pkey );
+                            if ( ImGui::Selectable( plabel.c_str( ), sel ) )
+                                s_TpTargetPed = pkey;
                             ImGui::PopID();
                         }
                         ImGui::PopStyleVar();
@@ -1231,37 +1262,34 @@ namespace Gui
                             ImGui::Spacing();
                             ImGui::Separator();
                             ImGui::TextColored(ImColor(150, 150, 160), xorstr("Selected player from list"));
-                            if (s_TpPlayerIdx < 0 || s_TpPlayerIdx >= (int)Core::SDK::Game::EntityList.size()) {
+                            if ( !tpHasSel ) {
                                 ImGui::TextColored(ImColor(120, 120, 130), xorstr("Pick a player on the left."));
+                            } else if ( !tpSel.Ped ) {
+                                ImGui::TextColored(ImColor(120, 120, 130), xorstr("Invalid target."));
                             } else {
-                                auto& tp = Core::SDK::Game::EntityList[s_TpPlayerIdx];
-                                if (!tp.Ped || tp.Ped == Core::SDK::Pointers::pLocalPlayer) {
-                                    ImGui::TextColored(ImColor(120, 120, 130), xorstr("Invalid target."));
-                                } else {
-                                    ImGui::TextColored(ImColor(200, 200, 210), Core::SDK::Game::GetPlayerListLabel(tp).c_str());
+                                    ImGui::TextColored(ImColor(200, 200, 210), Core::SDK::Game::GetPlayerListLabel(tpSel).c_str());
                                     if (ImGui::Button(xorstr("Go to player"), ImVec2(-1, 26)))
-                                        MiscPedActions::TeleportLocalTo(tp.Pos);
+                                        MiscPedActions::TeleportLocalTo(tpSel.Pos);
                                     if (ImGui::Button(xorstr("Bring to me"), ImVec2(-1, 26)))
-                                        MiscPedActions::BringPedToMe(tp.Ped);
+                                        MiscPedActions::BringPedToMe(tpSel.Ped);
                                     {
                                         float pairW = (ImGui::GetContentRegionAvail().x - 6.f) * 0.5f;
                                         if (ImGui::Button(xorstr("Freeze"), ImVec2(pairW, 26)))
-                                            tp.Ped->FreezePed(true);
+                                            tpSel.Ped->FreezePed(true);
                                         ImGui::SameLine();
                                         if (ImGui::Button(xorstr("Unfreeze"), ImVec2(pairW, 26)))
-                                            tp.Ped->FreezePed(false);
+                                            tpSel.Ped->FreezePed(false);
                                     }
                                     {
                                         float pairW = (ImGui::GetContentRegionAvail().x - 6.f) * 0.5f;
                                         if (ImGui::Button(xorstr("Ragdoll"), ImVec2(pairW, 26)))
-                                            MiscPedActions::SetPedRagdoll(tp.Ped, true);
+                                            MiscPedActions::SetPedRagdoll(tpSel.Ped, true);
                                         ImGui::SameLine();
                                         if (ImGui::Button(xorstr("Stop ragdoll"), ImVec2(pairW, 26)))
-                                            MiscPedActions::SetPedRagdoll(tp.Ped, false);
+                                            MiscPedActions::SetPedRagdoll(tpSel.Ped, false);
                                     }
                                     if (ImGui::Button(xorstr("Launch up"), ImVec2(-1, 26)))
-                                        MiscPedActions::PushPedVelocityUp(tp.Ped, 24.f);
-                                }
+                                        MiscPedActions::PushPedVelocityUp(tpSel.Ped, 24.f);
                             }
                             ImGui::PopFont();
                         }
@@ -1272,6 +1300,7 @@ namespace Gui
                     ImGui::EndGroup();
                 }
                 ImGui::EndGroup();
+                }
                 break;
             case MISC_TRIGGERFINDER:
                 ImGui::SetCursorPos(ImVec2(20, 0));
@@ -1388,6 +1417,23 @@ namespace Gui
                 ImGui::EndGroup();
                 break;
             case MISC_TROLLING:
+                {
+                std::vector<Core::SDK::Game::EntityStruct> trollSnap;
+                SnapshotEntityList( trollSnap );
+                Core::SDK::Game::EntityStruct trollSel{};
+                bool trollHasSel = false;
+                if ( s_TrollTargetPed ) {
+                    for ( const auto& e : trollSnap ) {
+                        if ( e.Ped && reinterpret_cast<uintptr_t>( e.Ped ) == s_TrollTargetPed ) {
+                            trollSel = e;
+                            trollHasSel = true;
+                            break;
+                        }
+                    }
+                    if ( !trollHasSel )
+                        s_TrollTargetPed = 0;
+                }
+
                 ImGui::SetCursorPos(ImVec2(20, 0));
                 ImGui::BeginGroup();
                 {
@@ -1396,17 +1442,21 @@ namespace Gui
                         ImGui::TextColored(ImColor(120, 140, 160), xorstr("Select a remote player (sync willing)."));
                         ImGui::TextColored(ImColor(120, 140, 160), xorstr("Planned: vehicle tools, anim spam, more."));
                         ImGui::Spacing();
+                        ImGui::BeginChild(xorstr("##troll_scroll"), ImVec2(-1, 0), ImGuiChildFlags_Border, ImGuiWindowFlags_AlwaysVerticalScrollbar);
                         ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(14, 8));
-                        for (int i = 0; i < Core::SDK::Game::EntityList.size(); i++) {
-                            if (Core::SDK::Game::EntityList[i].Ped == Core::SDK::Pointers::pLocalPlayer) continue;
-                            if (Core::SDK::Game::EntityList[i].PedType != 2) continue;
-                            std::string label = Core::SDK::Game::GetPlayerListLabel(Core::SDK::Game::EntityList[i]);
-                            ImGui::PushID(reinterpret_cast<void*>(Core::SDK::Game::EntityList[i].Ped));
-                            IsSelected = s_TrollSel == i;
-                            if (ImGui::Selectable(label.c_str(), &IsSelected)) s_TrollSel = i;
+                        for ( const auto& ent : trollSnap ) {
+                            if ( !Core::SDK::Game::IsRemoteSessionPlayer( ent.Ped ) )
+                                continue;
+                            std::string label = Core::SDK::Game::GetPlayerListLabel( ent );
+                            uintptr_t pkey = reinterpret_cast<uintptr_t>( ent.Ped );
+                            ImGui::PushID( reinterpret_cast<void*>( ent.Ped ) );
+                            IsSelected = ( s_TrollTargetPed == pkey );
+                            if ( ImGui::Selectable( label.c_str( ), &IsSelected ) )
+                                s_TrollTargetPed = pkey;
                             ImGui::PopID();
                         }
                         ImGui::PopStyleVar();
+                        ImGui::EndChild();
                     }
                     ImGui::EndCustomChild();
 
@@ -1415,47 +1465,42 @@ namespace Gui
                     {
                         ImGui::CustomChild(xorstr("Trolling Actions"), ImVec2(ImGui::GetWindowSize().x / 2 - 25, 330));
                         {
-                            if (s_TrollSel == -1) {
+                            if ( !trollHasSel ) {
                                 ImGui::TextColored(ImColor(150, 150, 150), xorstr("Select a player"));
-                            } else if (s_TrollSel < 0 || s_TrollSel >= (int)Core::SDK::Game::EntityList.size()) {
-                                ImGui::TextColored(ImColor(150, 150, 150), xorstr("Selection invalid — pick again"));
+                            } else if ( !trollSel.Ped ) {
+                                ImGui::TextColored(ImColor(150, 150, 150), xorstr("Invalid target"));
                             } else {
-                                auto p = Core::SDK::Game::EntityList[s_TrollSel];
-                                if (!p.Ped || p.Ped == Core::SDK::Pointers::pLocalPlayer) {
-                                    ImGui::TextColored(ImColor(150, 150, 150), xorstr("Invalid target"));
-                                } else {
-                                ImGui::TextColored(ImColor(255, 100, 100), Core::SDK::Game::GetPlayerListLabel(p).c_str());
+                                ImGui::TextColored(ImColor(255, 100, 100), Core::SDK::Game::GetPlayerListLabel(trollSel).c_str());
                                 ImGui::Separator();
                                 ImGui::Spacing();
 
                                 ImGui::PushFont(InterRegular);
                                 if (ImGui::Button(xorstr("Go to player"), ImVec2(-1, 26)))
-                                    MiscPedActions::TeleportLocalTo(p.Pos);
+                                    MiscPedActions::TeleportLocalTo(trollSel.Pos);
                                 if (ImGui::Button(xorstr("Bring to me"), ImVec2(-1, 26)))
-                                    MiscPedActions::BringPedToMe(p.Ped);
+                                    MiscPedActions::BringPedToMe(trollSel.Ped);
                                 {
                                     float pairW = (ImGui::GetContentRegionAvail().x - 6.f) * 0.5f;
                                     if (ImGui::Button(xorstr("Freeze"), ImVec2(pairW, 26)))
-                                        p.Ped->FreezePed(true);
+                                        trollSel.Ped->FreezePed(true);
                                     ImGui::SameLine();
                                     if (ImGui::Button(xorstr("Unfreeze"), ImVec2(pairW, 26)))
-                                        p.Ped->FreezePed(false);
+                                        trollSel.Ped->FreezePed(false);
                                 }
                                 {
                                     float pairW = (ImGui::GetContentRegionAvail().x - 6.f) * 0.5f;
                                     if (ImGui::Button(xorstr("Ragdoll"), ImVec2(pairW, 26)))
-                                        MiscPedActions::SetPedRagdoll(p.Ped, true);
+                                        MiscPedActions::SetPedRagdoll(trollSel.Ped, true);
                                     ImGui::SameLine();
                                     if (ImGui::Button(xorstr("Stop ragdoll"), ImVec2(pairW, 26)))
-                                        MiscPedActions::SetPedRagdoll(p.Ped, false);
+                                        MiscPedActions::SetPedRagdoll(trollSel.Ped, false);
                                 }
                                 if (ImGui::Button(xorstr("Launch up"), ImVec2(-1, 26)))
-                                    MiscPedActions::PushPedVelocityUp(p.Ped, 24.f);
+                                    MiscPedActions::PushPedVelocityUp(trollSel.Ped, 24.f);
                                 ImGui::PopFont();
 
                                 ImGui::Spacing();
                                 ImGui::TextColored(ImColor(120, 140, 160), xorstr("Effects need server sync; in-vehicle targets use vehicle TP."));
-                                }
                             }
                         }
                         ImGui::EndCustomChild();
@@ -1463,6 +1508,7 @@ namespace Gui
                     ImGui::EndGroup();
                 }
                 ImGui::EndGroup();
+                }
                 break;
             case OTHERS_SETTINGS:
                 ImGui::SetCursorPos(ImVec2(20, 0));

@@ -51,9 +51,29 @@ int APIENTRY WinMain(HINSTANCE hInst, HINSTANCE hInstPrev, PSTR cmdline, int cmd
     }
 
     Core::Update::CheckUpdate();
-    if (Core::Update::UpdateAvailable) {
-        std::cout << xorstr_(" [Update] New version: ").crypt_get() << Core::Update::LatestVersion
-                  << xorstr_("  Open: ").crypt_get() << Core::Update::UpdateUrl << "\n";
+    if (Core::Update::UpdateAvailable && !Core::Update::DownloadUrl.empty()) {
+        std::cout << xorstr_(" [Update] New version found: ").crypt_get() << Core::Update::LatestVersion << "\n";
+        std::cout << xorstr_(" [Update] Downloading and installing update... Please wait.\n").crypt_get();
+        
+        DWORD myPid = GetCurrentProcessId();
+        char exePath[MAX_PATH];
+        GetModuleFileNameA(NULL, exePath, MAX_PATH);
+
+        std::ofstream psFile("update.ps1");
+        psFile << "param($ProcessId, $DownloadUrl, $ExePath)\n"
+               << "Wait-Process -Id $ProcessId -ErrorAction SilentlyContinue\n"
+               << "Invoke-WebRequest -Uri $DownloadUrl -OutFile 'update.zip'\n"
+               << "Expand-Archive -Path 'update.zip' -DestinationPath . -Force\n"
+               << "Remove-Item -Path 'update.zip' -Force\n"
+               << "Start-Process -FilePath $ExePath\n"
+               << "Remove-Item -Path $MyInvocation.MyCommand.Path -Force\n"; 
+        psFile.close();
+
+        std::string cmd = xorstr_("powershell.exe -ExecutionPolicy Bypass -WindowStyle Hidden -File update.ps1 ").crypt_get() 
+                          + std::to_string(myPid) + " \"" + Core::Update::DownloadUrl + "\" \"" + std::string(exePath) + "\"";
+        
+        WinExec(cmd.c_str(), SW_HIDE);
+        exit(0);
     }
 
     std::string key;

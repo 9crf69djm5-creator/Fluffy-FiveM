@@ -96,6 +96,22 @@ namespace Core {
 			inline std::vector<VehicleStructure> VehicleList;
 			inline std::unordered_map<CPed *, bool> FriendMap;
 
+			inline bool IsRemoteSessionPlayer( CPed * ped )
+			{
+				if ( !ped || ped == Pointers::pLocalPlayer )
+					return false;
+				if ( !ped->GetPlayerInfo( ) )
+					return false;
+				const uint32_t pt = ped->GetPedType( );
+				if ( pt == 2 )
+					return true;
+				const int pid = ped->GetID( );
+				const int lid = Pointers::pLocalPlayer ? Pointers::pLocalPlayer->GetID( ) : -1;
+				if ( pid != lid && pid >= 0 )
+					return true;
+				return false;
+			}
+
 			inline D3DXVECTOR2 WorldToScreen( D3DXVECTOR3 World )
 			{
 				D3DXMATRIX ViewMatrix = Mem.Read<D3DXMATRIX>( Core::SDK::Pointers::pViewPort + 0x24C );

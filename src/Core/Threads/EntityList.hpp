@@ -16,11 +16,10 @@ namespace Core
         class cEntityList 
         {
         private:
-            std::mutex EntityListMutex;
-        private:
             CPedInterFace * CPedInterFace = nullptr;
             CPedList * CPedList = nullptr;
         public:
+            std::mutex EntityListMutex;
             std::unordered_map<CPed *, Core::SDK::Game::EntityStruct> CachedEntities;
         public:
             void Update( )
@@ -81,7 +80,11 @@ namespace Core
                             CachedEntity.Pos = CurrentPed->GetPos( );
                             CachedEntity.IsFriend = Core::SDK::Game::FriendMap[ CurrentPed ];
                             CachedEntity.Distance = CurrentPed->GetDistance( Core::SDK::Pointers::pLocalPlayer->GetPos( ), CachedEntity.Pos );
-                            CachedEntity.WeaponName = CurrentPed->GetWeaponManager( )->GetWeaponInfo( )->GetName( );
+                            CachedEntity.WeaponName.clear( );
+                            if ( CWeaponManager * wm = CurrentPed->GetWeaponManager( ) ) {
+                                if ( CWeaponInfo * wi = wm->GetWeaponInfo( ) )
+                                    CachedEntity.WeaponName = wi->GetName( );
+                            }
                             CachedEntities[ CurrentPed ] = CachedEntity;
 
                             Core::SDK::Game::EntityStruct Entity;
