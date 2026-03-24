@@ -23,6 +23,7 @@ $zipOut = Join-Path $archiveDir ("snapshot_" + $stamp + ".zip")
 New-Item -ItemType Directory -Force -Path $BackupRoot, $packageDir, $scriptsDir, $archiveDir | Out-Null
 
 $copyIfExists = @(
+    "Nova.exe",
     "Fluffy-FiveM.exe",
     "fluffyFiveM.exe",
     "D3DCompiler_43.dll",
@@ -32,7 +33,8 @@ $copyIfExists = @(
     "APP_VERSION",
     "README.md",
     ".github\workflows\publish-release.yml",
-    "tools\Update-FluffyFiveM.ps1"
+    "tools\Update-FluffyFiveM.ps1",
+    "tools\Ensure-LatestFluffy.ps1"
 )
 
 foreach ($item in $copyIfExists) {
@@ -48,6 +50,7 @@ foreach ($item in $copyIfExists) {
 }
 
 Copy-Item -Path (Join-Path $SourceDir "tools\Update-FluffyFiveM.ps1") -Destination (Join-Path $scriptsDir "Update-FluffyFiveM.ps1") -Force
+Copy-Item -Path (Join-Path $SourceDir "tools\Ensure-LatestFluffy.ps1") -Destination (Join-Path $scriptsDir "Ensure-LatestFluffy.ps1") -Force
 Copy-Item -Path (Join-Path $SourceDir "tools\Create-Desktop-Backup.ps1") -Destination (Join-Path $scriptsDir "Create-Desktop-Backup.ps1") -Force
 
 if (Test-Path $zipOut) {

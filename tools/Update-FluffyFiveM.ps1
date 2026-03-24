@@ -38,34 +38,42 @@ if ([string]::IsNullOrWhiteSpace($tag)) {
 
 Write-Host "Latest tag: $tag"
 
-$wanted = @(
-    "Fluffy-FiveM.exe",
-    "fluffyFiveM.exe",
-    "D3DCompiler_43.dll",
-    "d3dx9_43.dll",
-    "d3dx11_43.dll",
-    "d3dx10_43.dll"
-)
+$exeOrder = @("Nova.exe", "Fluffy-FiveM.exe", "fluffyFiveM.exe")
+$dllOrder = @("D3DCompiler_43.dll", "d3dx9_43.dll", "d3dx11_43.dll", "d3dx10_43.dll")
 
 $assets = @($releaseInfo.assets)
 if ($assets.Count -eq 0) {
     throw "Release has no assets."
 }
 
-$downloaded = @()
-foreach ($name in $wanted) {
+function Download-OneAsset {
+    param([string]$name)
     $asset = $assets | Where-Object { $_.name -eq $name } | Select-Object -First 1
-    if (-not $asset) {
-        continue
-    }
+    if (-not $asset) { return $false }
     $targetPath = Join-Path $InstallDir $asset.name
     Write-Host "Downloading $($asset.name) ..."
     Invoke-WebRequest -Uri $asset.browser_download_url -Headers $headers -OutFile $targetPath
-    $downloaded += $asset.name
+    return $true
 }
 
-if ($downloaded.Count -eq 0) {
-    throw "No matching assets found in release $tag."
+$downloaded = @()
+$gotExe = $false
+foreach ($name in $exeOrder) {
+    if (Download-OneAsset $name) {
+        $downloaded += $name
+        $gotExe = $true
+        break
+    }
+}
+
+foreach ($name in $dllOrder) {
+    if (Download-OneAsset $name) {
+        $downloaded += $name
+    }
+}
+
+if (-not $gotExe) {
+    throw "No executable asset found in release $tag (expected Nova.exe or Fluffy-FiveM.exe)."
 }
 
 $versionPath = Join-Path $InstallDir "APP_VERSION"

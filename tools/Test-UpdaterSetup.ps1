@@ -4,6 +4,7 @@ $root = Split-Path -Parent $PSScriptRoot
 $required = @(
     ".github\workflows\publish-release.yml",
     "tools\Update-FluffyFiveM.ps1",
+    "tools\Ensure-LatestFluffy.ps1",
     "tools\Create-Desktop-Backup.ps1",
     "APP_VERSION"
 )
