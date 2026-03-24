@@ -2,7 +2,7 @@
 
 ## Releases
 
-Download builds from [Releases](https://github.com/9crf69djm5-creator/Fluffy-FiveM/releases). Each release tag is `v` + the value in `APP_VERSION` at the repo root (for example `1.0.9` → **v1.0.9**).
+Download builds from [Releases](https://github.com/9crf69djm5-creator/Fluffy-FiveM/releases). Each release tag is `v` + the value in `APP_VERSION` at the repo root (for example `1.0.10` → **v1.0.10**).
 
 ## Version alignment (important)
 
