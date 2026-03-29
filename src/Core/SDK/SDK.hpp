@@ -225,23 +225,27 @@ namespace Core {
 					debugCount++;
 				}
 				
-				// First try to get the actual player name
-				if ( !Ent.NetworkInfo.UserName.empty( ) && Ent.NetworkInfo.UserName != unk )
-					return Ent.NetworkInfo.UserName;
-				
-				// If we have Steam ID, use it as fallback
-				if ( !Ent.NetworkInfo.SteamId.empty( ) )
-					return std::string( xorstr( "Steam:" ) ) + Ent.NetworkInfo.SteamId.substr( 0, 8 );
-				
-				// If we have Discord ID, use it as fallback
-				if ( !Ent.NetworkInfo.DiscordId.empty( ) )
-					return std::string( xorstr( "Discord:" ) ) + Ent.NetworkInfo.DiscordId.substr( 0, 8 );
-				
-				// If we have a valid player ID, use it
+				// ALWAYS show player ID as the primary fallback if no name
+				// This ensures we never show "Unknown" when we have a valid ID
 				if ( Ent.Id > 0 )
+				{
+					// First try to get the actual player name
+					if ( !Ent.NetworkInfo.UserName.empty( ) && Ent.NetworkInfo.UserName != unk )
+						return Ent.NetworkInfo.UserName;
+					
+					// If we have Steam ID, use it as fallback
+					if ( !Ent.NetworkInfo.SteamId.empty( ) )
+						return std::string( xorstr( "Steam:" ) ) + Ent.NetworkInfo.SteamId.substr( 0, 8 ) + xorstr( " (Player " ) + std::to_string( Ent.Id ) + xorstr( ")" );
+					
+					// If we have Discord ID, use it as fallback
+					if ( !Ent.NetworkInfo.DiscordId.empty( ) )
+						return std::string( xorstr( "Discord:" ) ) + Ent.NetworkInfo.DiscordId.substr( 0, 8 ) + xorstr( " (Player " ) + std::to_string( Ent.Id ) + xorstr( ")" );
+					
+					// Always show Player ID as last resort - NEVER show "Unknown" when we have an ID
 					return std::string( xorstr( "Player " ) ) + std::to_string( Ent.Id );
+				}
 				
-				// Last resort - show that we're still trying to resolve
+				// Only show "Resolving..." if we don't even have a player ID
 				return std::string( xorstr( "Resolving..." ) );
 			}
 
