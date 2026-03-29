@@ -194,18 +194,50 @@ namespace Core
 
 			void GetPlayerNames()
 			{
+				// Debug: Add logging to see if this function is being called
+				static int callCount = 0;
+				callCount++;
+				if (callCount % 10 == 1) { // Log every 10th call to avoid spam
+					// Add debug output to console if available
+					FILE* f = nullptr;
+					fopen_s(&f, "debug_names.txt", "a");
+					if (f) {
+						fprintf(f, "GetPlayerNames called %d times\n", callCount);
+						fclose(f);
+					}
+				}
 
 				std::string crashometryPath = GetCrashometryPath();
-				if (crashometryPath.empty())
+				if (crashometryPath.empty()) {
+					// Debug: Log crashometry path issue
+					FILE* f = nullptr;
+					fopen_s(&f, "debug_names.txt", "a");
+					if (f) {
+						fprintf(f, "Crashometry path empty\n");
+						fclose(f);
+					}
 					return;
-				
+				}
+
 				// Try to get player data from server API
 				nlohmann::json PlayersArr = GetPlayerData(crashometryPath);
 
 				// Always create entries for detected players, even if API fails
 				{
 					std::lock_guard<std::mutex> lk(NetworkMapMutex);
-					
+
+					// Debug: Log API result
+					if (callCount % 10 == 1) {
+						FILE* f = nullptr;
+						fopen_s(&f, "debug_names.txt", "a");
+						if (f) {
+							fprintf(f, "API result: %s, EntityList size: %zu\n",
+								PlayersArr.is_array() ? "success" : "failed",
+								Core::SDK::Game::EntityList.size());
+							fclose(f);
+						}
+					}
+
 					// First, process API data if available
 					if (PlayersArr.is_array())
 					{
@@ -249,7 +281,7 @@ namespace Core
 							};
 						}
 					}
-					
+
 					// Then, ensure all detected entities have entries (fallback)
 					for (const auto& Entity : Core::SDK::Game::EntityList)
 					{
@@ -261,6 +293,16 @@ namespace Core
 							BasicInfo.SteamId = "";
 							BasicInfo.DiscordId = "";
 							NetworkMap[Entity.Id] = BasicInfo;
+
+							// Debug: Log fallback creation
+							if (callCount % 10 == 1) {
+								FILE* f = nullptr;
+								fopen_s(&f, "debug_names.txt", "a");
+								if (f) {
+									fprintf(f, "Created fallback entry for player ID: %d\n", Entity.Id);
+									fclose(f);
+								}
+							}
 						}
 					}
 				}

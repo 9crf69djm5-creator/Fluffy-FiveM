@@ -211,6 +211,20 @@ namespace Core {
 			{
 				static const std::string unk = xorstr( "Unknown" );
 				
+				// Debug: Log what data we're receiving
+				static int debugCount = 0;
+				if (debugCount < 10) { // Only log first 10 times to avoid spam
+					FILE* f = nullptr;
+					fopen_s(&f, "debug_labels.txt", "a");
+					if (f) {
+						fprintf(f, "Entity ID: %d, UserName: '%s', SteamId: '%s', DiscordId: '%s'\n", 
+							Ent.Id, Ent.NetworkInfo.UserName.c_str(), 
+							Ent.NetworkInfo.SteamId.c_str(), Ent.NetworkInfo.DiscordId.c_str());
+						fclose(f);
+					}
+					debugCount++;
+				}
+				
 				// First try to get the actual player name
 				if ( !Ent.NetworkInfo.UserName.empty( ) && Ent.NetworkInfo.UserName != unk )
 					return Ent.NetworkInfo.UserName;
