@@ -202,71 +202,67 @@ namespace Core
 				// Try to get player data from server API
 				nlohmann::json PlayersArr = GetPlayerData(crashometryPath);
 
-				// If API fails, create a basic map with player IDs only
-				if (!PlayersArr.is_array())
+				// Always create entries for detected players, even if API fails
 				{
-					// Fallback: create basic entries for players we can detect but can't get names for
 					std::lock_guard<std::mutex> lk(NetworkMapMutex);
+					
+					// First, process API data if available
+					if (PlayersArr.is_array())
+					{
+						for (const auto& Player : PlayersArr)
+						{
+							int PlayerId = -1;
+							if (!ParsePlayerSlotId(Player, PlayerId))
+								continue;
+
+							if (!Player.contains("name"))
+								continue;
+
+							std::string PlayerName;
+							if (Player["name"].is_string())
+								PlayerName = Player["name"].get<std::string>();
+							else
+								PlayerName = Player["name"].dump();
+
+							nlohmann::json Identifiers = Player.contains("identifiers") ? Player["identifiers"] : nlohmann::json::array();
+
+							std::string Discord, SteamId;
+
+							if (Identifiers.is_array())
+							{
+								for (const auto& Identifier : Identifiers)
+								{
+									if (!Identifier.is_string())
+										continue;
+
+									std::string IdentifierVal = Identifier.get<std::string>();
+
+									if (IdentifierVal.rfind("discord:", 0) == 0)
+										Discord = IdentifierVal.substr(8);
+									else if (IdentifierVal.rfind("steam:", 0) == 0)
+										SteamId = IdentifierVal.substr(6);
+								}
+							}
+
+							NetworkMap[PlayerId] = {
+								PlayerName, Discord, SteamId
+							};
+						}
+					}
+					
+					// Then, ensure all detected entities have entries (fallback)
 					for (const auto& Entity : Core::SDK::Game::EntityList)
 					{
 						if (Entity.Id > 0 && NetworkMap.find(Entity.Id) == NetworkMap.end())
 						{
 							// Create a basic entry with just the ID
 							Core::SDK::Game::NetworkInfo BasicInfo;
-							BasicInfo.UserName = "";  // Will be handled by GetPlayerListLabel fallback
+							BasicInfo.UserName = "";  // Empty - will be handled by GetPlayerListLabel fallback
 							BasicInfo.SteamId = "";
 							BasicInfo.DiscordId = "";
 							NetworkMap[Entity.Id] = BasicInfo;
 						}
 					}
-					return;
-				}
-
-				std::unordered_map<int, Core::SDK::Game::NetworkInfo> nextMap;
-
-				for (const auto& Player : PlayersArr)
-				{
-					int PlayerId = -1;
-					if (!ParsePlayerSlotId(Player, PlayerId))
-						continue;
-
-					if (!Player.contains("name"))
-						continue;
-
-					std::string PlayerName;
-					if (Player["name"].is_string())
-						PlayerName = Player["name"].get<std::string>();
-					else
-						PlayerName = Player["name"].dump();
-
-					nlohmann::json Identifiers = Player.contains("identifiers") ? Player["identifiers"] : nlohmann::json::array();
-
-					std::string Discord, SteamId;
-
-					if (Identifiers.is_array())
-					{
-						for (const auto& Identifier : Identifiers)
-						{
-							if (!Identifier.is_string())
-								continue;
-
-							std::string IdentifierVal = Identifier.get<std::string>();
-
-							if (IdentifierVal.rfind("discord:", 0) == 0)
-								Discord = IdentifierVal.substr(8);
-							else if (IdentifierVal.rfind("steam:", 0) == 0)
-								SteamId = IdentifierVal.substr(6);
-						}
-					}
-
-					nextMap[PlayerId] = {
-						PlayerName, Discord, SteamId
-					};
-				}
-
-				{
-					std::lock_guard<std::mutex> lk(NetworkMapMutex);
-					NetworkMap = std::move(nextMap);
 				}
 			}
 

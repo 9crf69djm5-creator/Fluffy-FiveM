@@ -108,10 +108,6 @@ namespace Core
 
                             Entity.NetworkInfo.UserName = Utils::StringToFirstUpperCase( NetworkInfo.UserName );
 
-                            if ( Entity.NetworkInfo.UserName.empty( ) ) {
-                                Entity.NetworkInfo.UserName = xorstr( "Unknown" );
-                            }
-
                             Entity.NetworkInfo.SteamId = NetworkInfo.SteamId;
                             Entity.NetworkInfo.DiscordId = NetworkInfo.DiscordId;
 
